@@ -48,7 +48,7 @@ public class UADInterstitial {
         unityActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                interstitial = new ADInterstitial(adUnitId);
+                interstitial = new ADInterstitial(unityActivity, adUnitId);
                 interstitial.setListener(new AdDelegate() {
                     @Override
                     public void onAdLoaded() {
@@ -150,7 +150,7 @@ public class UADInterstitial {
             public void run() {
                 Log.d(Utils.LOGTAG, "Calling preLoad() ADInterstitial");
 
-                interstitial.preLoad();
+                interstitial.preLoad(unityActivity);
             }
         });
     }

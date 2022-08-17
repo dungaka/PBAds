@@ -113,7 +113,7 @@ public class UADBanner {
                         .getRootView()
                         .addOnLayoutChangeListener(viewChangeListener);
 
-                banner = new ADBanner(adPlaceholder, adUnitId);
+                banner = new ADBanner(unityActivity,adPlaceholder, adUnitId);
                 banner.setListener(new AdDelegate() {
                     @Override
                     public void onAdLoaded() {
@@ -197,14 +197,14 @@ public class UADBanner {
     /**
      * Load an {@link ADBanner}.
      */
-    public void load() {
+    public void load(Activity activity) {
         if (!isPluginReady()) return;
 
         unityActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 Log.d(Utils.LOGTAG, "Calling Load() ADBanner");
-                banner.load();
+                banner.load(activity);
             }
         });
     }

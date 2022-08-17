@@ -150,7 +150,7 @@ public class UADRewarded {
             @Override
             public void run() {
                 Log.d(Utils.LOGTAG, "Calling preLoad() ADRewarded");
-                rewarded.preLoad();
+                rewarded.preLoad(unityActivity);
             }
         });
     }
