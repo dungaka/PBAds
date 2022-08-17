@@ -3,12 +3,12 @@ apply plugin: 'com.github.dcendents.android-maven'
 group='com.github.valueimpression'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 33
     buildToolsVersion "29.0.3"
 
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 29
+        targetSdkVersion 33
     }
 
     buildTypes {
@@ -28,8 +28,9 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation files('libs/PrebidMobile-1.10.jar')
 
-    implementation 'com.google.android.gms:play-services-ads:18.2.0'
-    implementation 'androidx.appcompat:appcompat:1.1.0'
+    //noinspection GradleDependency
+    implementation 'com.google.android.gms:play-services-ads:19.5.0'
+    implementation 'androidx.appcompat:appcompat:1.5.0'
 
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13.2'
 }
