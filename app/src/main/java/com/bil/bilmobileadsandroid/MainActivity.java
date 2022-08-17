@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
 
 //        this.adNativeStyle = new ADNativeStyle(bannerView, "1004");
 
-        this.adNativeCustom = new ADNativeCustom("1004");
+        this.adNativeCustom = new ADNativeCustom(MainActivity.this,"1004");
         this.adNativeCustom.setListener(new NativeAdLoaderCustomDelegate() {
             @Override
             public void onNativeViewLoaded(ADNativeView.Builder builder) {
@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
         btnLoadFull.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                adNativeCustom.preload();
+                adNativeCustom.preload(MainActivity.this);
 //                if (adInterstitial != null) adInterstitial.preLoad();
 //                if (adRewarded != null) adRewarded.preLoad();
 //                if (adBanner != null)  adBanner.destroy();

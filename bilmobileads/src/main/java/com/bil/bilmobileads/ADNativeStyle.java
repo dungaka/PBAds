@@ -44,6 +44,7 @@ public class ADNativeStyle implements Application.ActivityLifecycleCallbacks {
     // MARK: - AD Info
     private String placement;
     private AdUnitObj adUnitObj;
+    private Activity activitis;
 
     // MARK: - Properties
     private ADFormat adFormatDefault;
@@ -52,7 +53,7 @@ public class ADNativeStyle implements Application.ActivityLifecycleCallbacks {
     private boolean setDefaultBidType = true;
     private boolean isFetchingAD = false;
 
-    public ADNativeStyle(ViewGroup adView, final String placementStr) {
+    public ADNativeStyle(Activity activity, ViewGroup adView, final String placementStr) {
         if (adView == null || placementStr == null) {
             PBMobileAds.getInstance().log(LogType.ERROR, "AdView Placeholder or placement is null");
             throw new NullPointerException();
@@ -61,12 +62,13 @@ public class ADNativeStyle implements Application.ActivityLifecycleCallbacks {
 
         this.adView = adView;
         this.placement = placementStr;
+        this.activitis = activity;
 
-        this.getConfigAD();
+        this.getConfigAD(activitis);
     }
 
     // MARK: - Handler AD
-    void getConfigAD() {
+    void getConfigAD(Activity activity) {
         this.adUnitObj = PBMobileAds.getInstance().getAdUnitObj(this.placement);
         if (this.adUnitObj == null) {
             this.isFetchingAD = true;
@@ -79,14 +81,11 @@ public class ADNativeStyle implements Application.ActivityLifecycleCallbacks {
                     isFetchingAD = false;
                     adUnitObj = data;
 
-                    PBMobileAds.getInstance().showCMP(new WorkCompleteDelegate() {
-                        @Override
-                        public void doWork() {
-                            // Setup Application Delegate
-                            ((Activity) PBMobileAds.getInstance().getContextApp()).getApplication().registerActivityLifecycleCallbacks(ADNativeStyle.this);
+                    PBMobileAds.getInstance().showCMP(() -> {
+                        // Setup Application Delegate
+                        activity.getApplication().registerActivityLifecycleCallbacks(ADNativeStyle.this);
 
-                            load();
-                        }
+                        load(activity);
                     });
                 }
 
@@ -98,14 +97,14 @@ public class ADNativeStyle implements Application.ActivityLifecycleCallbacks {
                 }
             });
         } else {
-            this.load();
+            this.load(activity);
         }
     }
 
-    boolean processNoBids() {
+    boolean processNoBids(Activity activity) {
         if (this.adUnitObj.adInfor.size() >= 2 && this.adFormatDefault == this.adUnitObj.defaultFormat) {
             this.setDefaultBidType = false;
-            this.load();
+            this.load(activity);
 
             return true;
         } else {
@@ -131,7 +130,7 @@ public class ADNativeStyle implements Application.ActivityLifecycleCallbacks {
     }
 
     // MARK: - Public FUNC
-    public void load() {
+    public void load(Activity activity) {
         PBMobileAds.getInstance().log(LogType.DEBUG, "ADNativeStyle Placement '" + this.placement + "' - isLoaded: " + this.isLoaded() + " | isFetchingAD: " + this.isFetchingAD);
         if (this.adView == null) {
             PBMobileAds.getInstance().log(LogType.ERROR, "ADNativeStyle placement: " + this.placement + ", AdView Placeholder is null.");
@@ -141,7 +140,7 @@ public class ADNativeStyle implements Application.ActivityLifecycleCallbacks {
         if (this.adUnitObj == null || this.isLoaded() || this.isFetchingAD) {
             if (this.adUnitObj == null && !this.isFetchingAD) {
                 PBMobileAds.getInstance().log(LogType.INFOR, "ADNativeStyle placement: " + this.placement + " is not ready to load.");
-                this.getConfigAD();
+                this.getConfigAD(activity);
                 return;
             }
             return;
@@ -183,7 +182,7 @@ public class ADNativeStyle implements Application.ActivityLifecycleCallbacks {
         setupNativeAsset();
 
         // Create AdView
-        this.amNative = new PublisherAdView(PBMobileAds.getInstance().getContextApp());
+        this.amNative = new PublisherAdView(activitis);
         this.amNative.setAdUnitId(adInfor.adUnitID);
         this.amNative.setAdSizes(AdSize.FLUID);
         this.amNative.setAdListener(new AdListener() {
@@ -235,7 +234,7 @@ public class ADNativeStyle implements Application.ActivityLifecycleCallbacks {
                 isLoadNativeSucc = false;
 
                 if (errorCode == AdRequest.ERROR_CODE_NO_FILL) {
-                    if (!processNoBids()) {
+                    if (!processNoBids(activity)) {
                         isFetchingAD = false;
                         if (adDelegate != null)
                             adDelegate.onAdFailedToLoad("onAdFailedToLoad: ADNativeStyle Placement '" + placement + "' with error: " + PBMobileAds.getInstance().getADError(errorCode));
@@ -268,7 +267,7 @@ public class ADNativeStyle implements Application.ActivityLifecycleCallbacks {
                     amNative.loadAd(amRequest);
                 } else {
                     if (resultCode == ResultCode.NO_BIDS) {
-                        processNoBids();
+                        processNoBids(activity);
                     } else if (resultCode == ResultCode.TIMEOUT) {
                         PBMobileAds.getInstance().log(LogType.INFOR, "ADNativeStyle Placement '" + placement + "' Timeout. Please check your internet connect.");
                     }
@@ -278,7 +277,7 @@ public class ADNativeStyle implements Application.ActivityLifecycleCallbacks {
     }
 
     public void destroy() {
-        ((Activity) PBMobileAds.getInstance().getContextApp()).getApplication().unregisterActivityLifecycleCallbacks(this);
+        activitis.getApplication().unregisterActivityLifecycleCallbacks(this);
 
         if (this.adUnit == null) return;
         PBMobileAds.getInstance().log(LogType.INFOR, "Destroy ADNativeStyle Placement: " + this.placement);
