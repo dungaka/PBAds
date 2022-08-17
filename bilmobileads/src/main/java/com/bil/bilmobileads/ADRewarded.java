@@ -51,11 +51,11 @@ public class ADRewarded {
         this.activityAd = activity;
         this.placement = placementStr;
 
-        this.getConfigAD();
+        this.getConfigAD(activity);
     }
 
     // MARK: - Handle AD
-    void getConfigAD() {
+    void getConfigAD(Activity activity) {
         this.adUnitObj = PBMobileAds.getInstance().getAdUnitObj(this.placement);
         if (this.adUnitObj == null) {
             this.isFetchingAD = true;
@@ -68,12 +68,7 @@ public class ADRewarded {
                     isFetchingAD = false;
                     adUnitObj = data;
 
-                    PBMobileAds.getInstance().showCMP(new WorkCompleteDelegate() {
-                        @Override
-                        public void doWork() {
-                            preLoad();
-                        }
-                    });
+                    PBMobileAds.getInstance().showCMP(() -> preLoad(activity));
                 }
 
                 @Override
@@ -83,7 +78,7 @@ public class ADRewarded {
                 }
             });
         } else {
-            this.preLoad();
+            this.preLoad(activity);
         }
     }
 
@@ -131,12 +126,12 @@ public class ADRewarded {
     }
 
     // MARK: - Public FUNC
-    public void preLoad() {
+    public void preLoad(Activity activity) {
         PBMobileAds.getInstance().log(LogType.DEBUG, "ADRewarded Placement '" + this.placement + "' - isReady: " + this.isReady() + " | isFetchingAD: " + this.isFetchingAD);
         if (this.adUnitObj == null || this.isReady() || this.isFetchingAD) {
             if (this.adUnitObj == null && !this.isFetchingAD) {
                 PBMobileAds.getInstance().log(LogType.INFOR, "ADRewarded placement: " + this.placement + " is not ready to load.");
-                this.getConfigAD();
+                this.getConfigAD(activity);
                 return;
             }
             return;
@@ -161,7 +156,7 @@ public class ADRewarded {
         PBMobileAds.getInstance().setupPBS(adInfor.host);
         PBMobileAds.getInstance().log(LogType.DEBUG, "[ADRewarded Video] - configId: " + adInfor.configId + " | adUnitID: " + adInfor.adUnitID);
         this.adUnit = new RewardedVideoAdUnit(adInfor.configId);
-        this.amRewarded = new RewardedAd(PBMobileAds.getInstance().getContextApp(), adInfor.adUnitID);
+        this.amRewarded = new RewardedAd(activity, adInfor.adUnitID);
 
         // Create Request PBS
         this.isFetchingAD = true;

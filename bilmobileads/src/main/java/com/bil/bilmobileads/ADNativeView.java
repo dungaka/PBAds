@@ -1,5 +1,6 @@
 package com.bil.bilmobileads;
 
+import android.app.Activity;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.view.View;
@@ -35,17 +36,19 @@ public final class ADNativeView {
 
         private UnifiedNativeAd gadNativeAd;
         private UnifiedNativeAdView nativeAdView;
+        private Activity activity;
 
-        public Builder(String placement, PrebidNativeAd nativeAd) {
+        public Builder(Activity activity, String placement, PrebidNativeAd nativeAd) {
             this.placement = placement;
             this.nativeAd = nativeAd;
-            this.nativeAdView = new UnifiedNativeAdView(PBMobileAds.getInstance().getContextApp());
+            this.nativeAdView = new UnifiedNativeAdView(activity);
         }
 
-        public Builder(String placement, UnifiedNativeAd gadNativeAd) {
+        public Builder(Activity act, String placement, UnifiedNativeAd gadNativeAd) {
             this.placement = placement;
             this.gadNativeAd = gadNativeAd;
-            this.nativeAdView = new UnifiedNativeAdView(PBMobileAds.getInstance().getContextApp());
+            this.activity = act;
+            this.nativeAdView = new UnifiedNativeAdView(activity);
         }
 
         public ADNativeView.Builder setNativeView(View view) {
@@ -118,12 +121,12 @@ public final class ADNativeView {
 
         public ADNativeView.Builder setMediaView(FrameLayout frameLayout) {
             if (this.isGAD()) {
-                MediaView mediaView = new MediaView(PBMobileAds.getInstance().getContextApp());
+                MediaView mediaView = new MediaView(activity);
                 mediaView.setMediaContent(this.gadNativeAd.getMediaContent());
                 frameLayout.addView(mediaView);
                 this.nativeAdView.setMediaView(mediaView);
             } else {
-                ImageView imageView = new ImageView(PBMobileAds.getInstance().getContextApp());
+                ImageView imageView = new ImageView(activity);
                 Util.loadImage(imageView, this.nativeAd.getImageUrl());
                 frameLayout.addView(imageView);
             }

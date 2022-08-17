@@ -44,7 +44,7 @@ public class ADNativeStyle implements Application.ActivityLifecycleCallbacks {
     // MARK: - AD Info
     private String placement;
     private AdUnitObj adUnitObj;
-    private Activity activitis;
+    private Activity activity;
 
     // MARK: - Properties
     private ADFormat adFormatDefault;
@@ -53,7 +53,7 @@ public class ADNativeStyle implements Application.ActivityLifecycleCallbacks {
     private boolean setDefaultBidType = true;
     private boolean isFetchingAD = false;
 
-    public ADNativeStyle(Activity activity, ViewGroup adView, final String placementStr) {
+    public ADNativeStyle(Activity act, ViewGroup adView, final String placementStr) {
         if (adView == null || placementStr == null) {
             PBMobileAds.getInstance().log(LogType.ERROR, "AdView Placeholder or placement is null");
             throw new NullPointerException();
@@ -62,9 +62,9 @@ public class ADNativeStyle implements Application.ActivityLifecycleCallbacks {
 
         this.adView = adView;
         this.placement = placementStr;
-        this.activitis = activity;
+        this.activity = act;
 
-        this.getConfigAD(activitis);
+        this.getConfigAD(activity);
     }
 
     // MARK: - Handler AD
@@ -182,7 +182,7 @@ public class ADNativeStyle implements Application.ActivityLifecycleCallbacks {
         setupNativeAsset();
 
         // Create AdView
-        this.amNative = new PublisherAdView(activitis);
+        this.amNative = new PublisherAdView(activity);
         this.amNative.setAdUnitId(adInfor.adUnitID);
         this.amNative.setAdSizes(AdSize.FLUID);
         this.amNative.setAdListener(new AdListener() {
@@ -277,7 +277,7 @@ public class ADNativeStyle implements Application.ActivityLifecycleCallbacks {
     }
 
     public void destroy() {
-        activitis.getApplication().unregisterActivityLifecycleCallbacks(this);
+        activity.getApplication().unregisterActivityLifecycleCallbacks(this);
 
         if (this.adUnit == null) return;
         PBMobileAds.getInstance().log(LogType.INFOR, "Destroy ADNativeStyle Placement: " + this.placement);

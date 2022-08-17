@@ -148,7 +148,7 @@ public class ADNativeCustom {
                 .forUnifiedNativeAd(unifiedNativeAd -> {
                     isFetchingAD = false;
 
-                    ADNativeView.Builder builder = new ADNativeView.Builder(placement, unifiedNativeAd);
+                    ADNativeView.Builder builder = new ADNativeView.Builder(activity, placement, unifiedNativeAd);
 
                     PBMobileAds.getInstance().log(LogType.INFOR, "onNativeAdViewLoaded: ADNativeCustom Unified Placement '" + placement + "'");
                     if (adNativeDelegate != null) adNativeDelegate.onNativeViewLoaded(builder);
@@ -161,7 +161,7 @@ public class ADNativeCustom {
                             public void onPrebidNativeLoaded(PrebidNativeAd ad) {
                                 isFetchingAD = false;
 
-                                ADNativeView.Builder builder = new ADNativeView.Builder(placement, ad);
+                                ADNativeView.Builder builder = new ADNativeView.Builder(activity,placement, ad);
 
                                 PBMobileAds.getInstance().log(LogType.INFOR, "onNativeAdViewLoaded: ADNativeCustom CustomTemplate Placement '" + placement + "'");
                                 if (adNativeDelegate != null) adNativeDelegate.onNativeViewLoaded(builder);

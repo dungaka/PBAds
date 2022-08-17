@@ -1,5 +1,7 @@
 package com.bil.bilmobileads;
 
+import android.app.Activity;
+
 import com.bil.bilmobileads.entity.LogType;
 import com.bil.bilmobileads.interfaces.ResultCallback;
 import com.bil.bilmobileads.interfaces.WorkCompleteDelegate;
@@ -38,7 +40,7 @@ public class ADInterstitial {
     private boolean isFetchingAD = false;
     private boolean setDefaultBidType = true;
 
-    public ADInterstitial(final String placementStr) {
+    public ADInterstitial(Activity activity, final String placementStr) {
         if (placementStr == null) {
             PBMobileAds.getInstance().log(LogType.ERROR, "Placement is null");
             throw new NullPointerException();
@@ -46,11 +48,11 @@ public class ADInterstitial {
 
         PBMobileAds.getInstance().log(LogType.INFOR, "ADInterstitial placement: " + placementStr + " Init");
         this.placement = placementStr;
-        this.getConfigAD();
+        this.getConfigAD(activity);
     }
 
     // MARK: - Handle AD
-    void getConfigAD() {
+    void getConfigAD(Activity activity) {
         this.adUnitObj = PBMobileAds.getInstance().getAdUnitObj(this.placement);
         if (this.adUnitObj == null) {
             this.isFetchingAD = true;
@@ -63,12 +65,7 @@ public class ADInterstitial {
                     isFetchingAD = false;
                     adUnitObj = data;
 
-                    PBMobileAds.getInstance().showCMP(new WorkCompleteDelegate() {
-                        @Override
-                        public void doWork() {
-                            preLoad();
-                        }
-                    });
+                    PBMobileAds.getInstance().showCMP(() -> preLoad(activity));
                 }
 
                 @Override
@@ -78,14 +75,14 @@ public class ADInterstitial {
                 }
             });
         } else {
-            this.preLoad();
+            this.preLoad(activity);
         }
     }
 
-    boolean processNoBids() {
+    boolean processNoBids(Activity activity) {
         if (this.adUnitObj.adInfor.size() >= 2 && this.adFormatDefault == this.adUnitObj.defaultFormat) {
             this.setDefaultBidType = false;
-            this.preLoad();
+            this.preLoad(activity);
 
             return true;
         } else {
@@ -109,12 +106,12 @@ public class ADInterstitial {
     }
 
     // MARK: - Public FUNC
-    public void preLoad() {
+    public void preLoad(Activity activity) {
         PBMobileAds.getInstance().log(LogType.DEBUG, "ADInterstitial Placement '" + this.placement + "' - isReady: " + this.isReady() + " | isFetchingAD: " + this.isFetchingAD);
         if (this.adUnitObj == null || this.isReady() || this.isFetchingAD) {
             if (this.adUnitObj == null && !this.isFetchingAD) {
                 PBMobileAds.getInstance().log(LogType.INFOR, "ADInterstitial placement: " + this.placement + " is not ready to load.");
-                this.getConfigAD();
+                this.getConfigAD(activity);
                 return;
             }
             return;
@@ -151,7 +148,7 @@ public class ADInterstitial {
             PBMobileAds.getInstance().log(LogType.DEBUG, "[ADInterstitial HTML] - configId: " + adInfor.configId + " | adUnitID: " + adInfor.adUnitID);
             this.adUnit = new InterstitialAdUnit(adInfor.configId);
         }
-        this.amInterstitial = new PublisherInterstitialAd(PBMobileAds.getInstance().getContextApp());
+        this.amInterstitial = new PublisherInterstitialAd(activity);
         this.amInterstitial.setAdUnitId(adInfor.adUnitID);
         this.amInterstitial.setAdListener(new AdListener() {
             @Override
@@ -201,7 +198,7 @@ public class ADInterstitial {
 
                 isFetchingAD = false;
                 if (errorCode == AdRequest.ERROR_CODE_NO_FILL) {
-                    if (!processNoBids()) {
+                    if (!processNoBids(activity)) {
                         if (adDelegate != null)
                             adDelegate.onAdFailedToLoad("onAdFailedToLoad: ADInterstitial Placement '" + placement + "' with error: " + PBMobileAds.getInstance().getADError(errorCode));
                     }
@@ -229,7 +226,7 @@ public class ADInterstitial {
                 } else {
                     isFetchingAD = false;
                     if (resultCode == ResultCode.NO_BIDS) {
-                        processNoBids();
+                        processNoBids(activity);
                     } else if (resultCode == ResultCode.TIMEOUT) {
                         PBMobileAds.getInstance().log(LogType.INFOR, "ADInterstitial Placement '" + placement + "' Timeout. Please check your internet connect.");
                     }
